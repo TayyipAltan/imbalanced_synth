@@ -1,0 +1,14 @@
+name: imb_syn
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pandas
+  - seaborn
+  - matplotlib
+  - scikit-learn
+  - imbalanced-learn
+  - pip
+  - pip:
+      - sdv  
