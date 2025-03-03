@@ -14,7 +14,7 @@ def noise_sampler(X_train, y_train):
 
     sample_results = {}
 
-    for col in X.columns:
+    for col in X_train.columns:
         col_mean = train[col].mean()
         col_std = train[col].std()
         
