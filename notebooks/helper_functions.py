@@ -1,16 +1,16 @@
-from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.base import BaseEstimator
 import pandas as pd  
 import numpy as np
 
-class NoiseSampler(BaseEstimator, TransformerMixin):
+class NoiseSampler(BaseEstimator):
     
     def __init__(self):
         pass
     
-    def fit(self, X, y=None):
-        return self
+    def fit_resample(self, X, y):
+        return self.resample(X, y)
     
-    def transform(self, X, y = None):
+    def resample(self, X, y):
         """Function to generate synthetic samples for the minority class using noise"""
         
         if y is None:
