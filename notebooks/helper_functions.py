@@ -68,6 +68,7 @@ class ColumnScaler(BaseEstimator, TransformerMixin):
     
     def fit(self, X, y = None):
         self.scalers = {col: MinMaxScaler().fit(X[[col]]) for col in self.cols_to_normalize}
+        return self
     
     def transform(self, X, y = None):
         X_train = X.copy()
@@ -98,12 +99,8 @@ class SDVSampler(BaseEstimator):
         
         X_resampled = X_minority.copy()
         
-        # Define metadata and synthesizer with default parameters and no constraints
-        metadata = Metadata.detect_from_dataframe(X_resampled)
-        synthesizer = self.generator(metadata)
-        
-        synthesizer.fit(X_resampled)
-        X_sds = synthesizer.sample(num_samples)
+        self.generator.fit(X_resampled)
+        X_sds = self.generator.sample(num_samples)
         
         return X_sds
     
