@@ -80,10 +80,10 @@ class ColumnScaler(BaseEstimator, TransformerMixin):
     
 # Recode this to inherit from a BaseSampler class
 # Then, also adjust the NoiseSampler
-class CTGANSampler(BaseEstimator):  
+class SDVSampler(BaseEstimator):  
     
-    def __init__(self):
-        pass
+    def __init__(self, generator = None):
+        self.generator = generator
     
     def fit_resample(self, X, y):
         return self.resample(X, y)
@@ -100,7 +100,7 @@ class CTGANSampler(BaseEstimator):
         
         # Define metadata and synthesizer with default parameters and no constraints
         metadata = Metadata.detect_from_dataframe(X_resampled)
-        synthesizer = CTGANSynthesizer(metadata)
+        synthesizer = self.generator(metadata)
         
         synthesizer.fit(X_resampled)
         X_sds = synthesizer.sample(num_samples)
