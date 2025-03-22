@@ -10,5 +10,7 @@ dependencies:
   - scikit-learn
   - imbalanced-learn
   - pip
+  - skopt
+  - lightgbm
   - pip:
       - sdv  
