@@ -100,6 +100,7 @@ class SDVSampler(BaseEstimator):
         # Creating a new instance of the synthesizer within each fold
         synthesizer = self.generator(self.metadata)
         
+        # Fitting and resampling
         synthesizer.fit(X_resampled)
         X_sds = synthesizer.sample(num_samples)
         
