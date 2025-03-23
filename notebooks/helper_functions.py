@@ -71,7 +71,7 @@ class ColumnScaler(BaseEstimator, TransformerMixin):
         X_train = X.copy()
         
         for col in self.cols_to_normalize:
-            X_train[col] = self.scalers[col].transform(X_train[col]) 
+            X_train[col] = self.scalers[col].transform(X_train[[col]]) 
             
         return X_train  
     
