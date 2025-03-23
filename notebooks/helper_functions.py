@@ -83,8 +83,9 @@ class ColumnScaler(BaseEstimator, TransformerMixin):
 # Then, also adjust the NoiseSampler
 class SDVSampler(BaseEstimator):  
     
-    def __init__(self, generator = None):
+    def __init__(self, generator, metadata):
         self.generator = generator
+        self.metadata = metadata
     
     def fit_resample(self, X, y):
         return self.resample(X, y)
@@ -99,8 +100,11 @@ class SDVSampler(BaseEstimator):
         
         X_resampled = X_minority.copy()
         
-        self.generator.fit(X_resampled)
-        X_sds = self.generator.sample(num_samples)
+        # Creating a new instance of the synthesizer within each fold
+        synthesizer = self.generator(self.metadata)
+        
+        synthesizer.fit(X_resampled)
+        X_sds = synthesizer.sample(num_samples)
         
         return X_sds
     
