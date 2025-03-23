@@ -1,12 +1,9 @@
 import pandas as pd  
 import numpy as np
 
-from sdv.metadata import Metadata
-from sdv.single_table import CTGANSynthesizer
-
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import f1_score, roc_auc_score, precision_score, recall_score
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 
 class NoiseSampler(BaseEstimator):
     
@@ -67,7 +64,7 @@ class ColumnScaler(BaseEstimator, TransformerMixin):
         self.scalers = {}
     
     def fit(self, X, y = None):
-        self.scalers = {col: MinMaxScaler().fit(X[[col]]) for col in self.cols_to_normalize}
+        self.scalers = {col: StandardScaler().fit(X[[col]]) for col in self.cols_to_normalize}
         return self
     
     def transform(self, X, y = None):
