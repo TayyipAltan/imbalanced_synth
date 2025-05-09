@@ -24,10 +24,10 @@ class NoiseSampler(BaseEstimator):
         sample_results = {}
 
         for col in X_minority.columns:
-            col_min = X_minority[col].min()
-            col_max = X_minority[col].max()
+            col_mean = X_minority[col].mean()
+            col_std = X_minority[col].std()
             
-            s = np.random.uniform(col_min, col_max, size = num_samples)
+            s = np.random.normal(loc=col_mean, scale = col_std, size = num_samples)
             
             sample_results[col] = s
 
@@ -61,17 +61,16 @@ class ColumnScaler(BaseEstimator, TransformerMixin):
     
     def __init__(self, cols_to_normalize = None):
         self.cols_to_normalize = cols_to_normalize if cols_to_normalize else ['Time', 'Amount']
-        self.scalers = {}
+        self.scaler = StandardScaler()
     
     def fit(self, X, y = None):
-        self.scalers = {col: StandardScaler().fit(X[[col]]) for col in self.cols_to_normalize}
+        self.scaler = self.scaler.fit(X[self.cols_to_normalize])
         return self
     
     def transform(self, X, y = None):
         X_train = X.copy()
         
-        for col in self.cols_to_normalize:
-            X_train[col] = self.scalers[col].transform(X_train[[col]]) 
+        X_train[self.cols_to_normalize] = self.scaler.transform(X_train[self.cols_to_normalize]) 
             
         return X_train  
     
