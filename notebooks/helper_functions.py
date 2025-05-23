@@ -5,10 +5,39 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import f1_score, roc_auc_score, precision_score, recall_score
 from sklearn.preprocessing import StandardScaler
 
-class NoiseSampler(BaseEstimator):
+
+class BaseSampler(BaseEstimator):
+    """Base class for all samplers. This class is not meant to be used directly.
+    """
     
-    def __init__(self):
-        pass
+    def __init__(self, random_state = None):
+        self.random_state = random_state
+        if random_state is not None:
+            np.random.seed(random_state)
+    
+    def fit_resample(self, X, y):
+        """Fit the sampler to the data and return the resampled data. Essentially the same as what is done in the original code"""
+        raise NotImplementedError("Subclasses should implement this method.")
+    
+    
+    def _get_num_samples(self, y):
+        """Get the number of samples to generate for the minority class."""
+        y_values = y.value_counts()
+        num_samples = y_values[0] - y_values[1]
+        
+        return num_samples
+    
+    
+    def resample(self, X, y):
+        """Resample the data using the specified sampling method. Should be the same as the original ones"""
+        raise NotImplementedError("Subclasses should implement this method.")
+
+class NoiseSampler(BaseEstimator, BaseSampler): # Do I still need BaseEstimator if I inherit from BaseSampler?
+    
+    def __init__(self, random_state = None):
+        self.random_state = random_state
+        if random_state is not None:
+            np.random.seed(random_state)
     
     def fit_resample(self, X, y):
         return self.resample(X, y)
@@ -48,9 +77,9 @@ class NoiseSampler(BaseEstimator):
         
         # Generate synthetic samples
         X_upsampled = self._generate_syn_data(X_minority, num_samples)
-        X_sampled = pd.concat([X_train, X_upsampled], axis = 0)
 
-        # Also updating the target variable
+        # pdating indepent variables and the target variable
+        X_sampled = pd.concat([X_train, X_upsampled], axis = 0)
         y_sampled = pd.concat([y_train, pd.Series(np.ones(num_samples))], axis = 0)
 
         return X_sampled, y_sampled
@@ -80,6 +109,7 @@ class ColumnScaler(BaseEstimator, TransformerMixin):
 class SDVSampler(BaseEstimator):  
     
     def __init__(self, generator, metadata):
+        
         self.generator = generator
         self.metadata = metadata
     
@@ -118,9 +148,9 @@ class SDVSampler(BaseEstimator):
         
         # Generate synthetic samples
         X_upsampled = self._generate_syn_data(X_minority, num_samples)
-        X_sampled = pd.concat([X_train, X_upsampled], axis = 0)
 
         # Also updating the target variable
+        X_sampled = pd.concat([X_train, X_upsampled], axis = 0)
         y_sampled = pd.concat([y_train, pd.Series(np.ones(num_samples))], axis = 0)
 
         return X_sampled, y_sampled         
