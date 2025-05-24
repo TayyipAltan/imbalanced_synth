@@ -17,55 +17,20 @@ class BaseSampler(BaseEstimator):
     
     def fit_resample(self, X, y):
         """Fit the sampler to the data and return the resampled data. Essentially the same as what is done in the original code"""
-        raise NotImplementedError("Subclasses should implement this method.")
-    
+        return self.resample(X, y)
     
     def _get_num_samples(self, y):
         """Get the number of samples to generate for the minority class."""
         y_values = y.value_counts()
         num_samples = y_values[0] - y_values[1]
         
-        return num_samples
-    
-    
-    def resample(self, X, y):
-        """Resample the data using the specified sampling method. Should be the same as the original ones"""
-        raise NotImplementedError("Subclasses should implement this method.")
-
-class NoiseSampler(BaseEstimator, BaseSampler): # Do I still need BaseEstimator if I inherit from BaseSampler?
-    
-    def __init__(self, random_state = None):
-        self.random_state = random_state
-        if random_state is not None:
-            np.random.seed(random_state)
-    
-    def fit_resample(self, X, y):
-        return self.resample(X, y)
-    
-    def _get_num_samples(self, y):
-        y_values = y.value_counts()
-        num_samples = y_values[0] - y_values[1]
-        
-        return num_samples
+        return num_samples  
     
     def _generate_syn_data(self, X_minority, num_samples):
-        
-        sample_results = {}
+        raise NotImplementedError("Subclasses should implement `_generate_syn_data`.")
 
-        for col in X_minority.columns:
-            col_mean = X_minority[col].mean()
-            col_std = X_minority[col].std()
-            
-            s = np.random.normal(loc=col_mean, scale = col_std, size = num_samples)
-            
-            sample_results[col] = s
-
-        X_upsampled = pd.DataFrame(sample_results)
-        
-        return X_upsampled
-    
     def resample(self, X, y):
-        """Function to generate synthetic samples for the minority class using noise"""
+        """Resample the data using the specified sampling method. Should be the same as the original ones"""
         
         X_train = X.copy()
         y_train = y.copy()
@@ -104,24 +69,35 @@ class ColumnScaler(BaseEstimator, TransformerMixin):
         return X_train  
     
     
-# Recode this to inherit from a BaseSampler class
-# Then, also adjust the NoiseSampler
-class SDVSampler(BaseEstimator):  
+class NoiseSampler(BaseSampler):
     
-    def __init__(self, generator, metadata):
+    def __init__(self, random_state = None):
+        super().__init__(random_state)
+           
+    def _generate_syn_data(self, X_minority, num_samples):
         
+        sample_results = {}
+
+        for col in X_minority.columns:
+            col_mean = X_minority[col].mean()
+            col_std = X_minority[col].std()
+            
+            s = np.random.normal(loc=col_mean, scale = col_std, size = num_samples)
+            
+            sample_results[col] = s
+
+        X_upsampled = pd.DataFrame(sample_results)
+        
+        return X_upsampled    
+
+
+class SDVSampler(BaseSampler):  
+    
+    def __init__(self, generator, metadata, random_state = None):
+        super().__init__(random_state)
         self.generator = generator
         self.metadata = metadata
-    
-    def fit_resample(self, X, y):
-        return self.resample(X, y)
-    
-    def _get_num_samples(self, y): # move this to init
-        y_values = y.value_counts()
-        num_samples = y_values[0] - y_values[1]
-        
-        return num_samples
-    
+       
     def _generate_syn_data(self, X_minority, num_samples):
         
         X_resampled = X_minority.copy()
@@ -134,28 +110,8 @@ class SDVSampler(BaseEstimator):
         X_sds = synthesizer.sample(num_samples)
         
         return X_sds
-    
-    def resample(self, X, y):
-        """Function to generate synthetic samples for the minority class using noise"""
         
-        X_train = X.copy()
-        y_train = y.copy()
-        
-        num_samples = self._get_num_samples(y_train)
-
-        # Obtain the minority class that needs to be upsampled
-        X_minority = X_train[y_train == 1]
-        
-        # Generate synthetic samples
-        X_upsampled = self._generate_syn_data(X_minority, num_samples)
-
-        # Also updating the target variable
-        X_sampled = pd.concat([X_train, X_upsampled], axis = 0)
-        y_sampled = pd.concat([y_train, pd.Series(np.ones(num_samples))], axis = 0)
-
-        return X_sampled, y_sampled         
-            
-            
+               
 def get_scores(y_test, y_preds, sampling_procedures):
     """Calculates precison, recall, F1, and ROC AUC scores for each sampling procedure.
     """
