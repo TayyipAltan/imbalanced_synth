@@ -112,21 +112,16 @@ class SDVSampler(BaseSampler):
         return X_sds
         
                
-def get_scores(y_test, y_preds, sampling_procedures):
-    """Calculates precison, recall, F1, and ROC AUC scores for each sampling procedure.
-    """
-    scores_dict = {}
+def display_scores(cv_scores, scorings):
     
-    for i in range(len(y_preds)):
-        precision = precision_score(y_test, y_preds[i], average = 'macro')
-        recall = recall_score(y_test, y_preds[i], average = 'macro')
-        f1 = f1_score(y_test, y_preds[i], average = 'macro')
-        roc_auc = roc_auc_score(y_test, y_preds[i])
-        
-        scores_dict[sampling_procedures[i]] = [precision, recall, f1, roc_auc]
+    res = {}
+   
+    for scoring in scorings:
+        res[scoring] = [round(score[f"test_{scoring}"].mean(), 3) for score in cv_scores]
     
-    scores_df = pd.DataFrame(scores_dict).T
-    scores_df.columns = ['Precision', 'Recall', 'F1', 'ROC_AUC']
+    res_df = pd.DataFrame(res)
+    res_df.index = ['Baseline', 'Noise', 'ROS', 'SMOTE', 'CTGAN', 'TVAE', 'CSL']
     
-    return scores_df
+    return res_df
+       
 
