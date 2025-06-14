@@ -93,17 +93,23 @@ class NoiseSampler(BaseSampler):
 
 class SDVSampler(BaseSampler):  
     
-    def __init__(self, generator, metadata, random_state = None):
+    def __init__(self, generator, metadata, random_state = None, def_distr = None):
         super().__init__(random_state)
         self.generator = generator
         self.metadata = metadata
+        self.def_distr = def_distr 
        
     def _generate_syn_data(self, X_minority, num_samples):
         
         X_resampled = X_minority.copy()
         
-        # Creating a new instance of the synthesizer within each fold
-        synthesizer = self.generator(self.metadata)
+        # If statement in case Gaussian Copula is used
+        if self.def_distr is not None:
+            # Creating a new instance of the synthesizer within each fold
+            synthesizer = self.generator(self.metadata, 
+                                         default_distribution=self.def_distr)
+        else:
+            synthesizer = self.generator(self.metadata)
         
         # Fitting and resampling
         synthesizer.fit(X_resampled)
@@ -117,10 +123,11 @@ def display_scores(cv_scores, scorings):
     res = {}
    
     for scoring in scorings:
-        res[scoring] = [round(score[f"test_{scoring}"].mean(), 3) for score in cv_scores]
+        res[scoring.capitalize()] = [round(score[f"test_{scoring}"].mean(), 3) for score in cv_scores]
     
     res_df = pd.DataFrame(res)
-    res_df.index = ['Baseline', 'Noise', 'ROS', 'SMOTE', 'CTGAN', 'TVAE', 'CSL']
+    res_df.index = ['Baseline', 'Noise', 'ROS', 'SMOTE', 'CTGAN', 'TVAE', 'Gaussian Copula',
+                    'CSL']
     
     return res_df
        
