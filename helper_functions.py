@@ -122,7 +122,7 @@ def display_scores(cv_scores, scorings):
         res[scoring.capitalize()] = [round(score[f"test_{scoring}"].mean(), 3) for score in cv_scores]
     
     res_df = pd.DataFrame(res)
-    res_df.index = ['Baseline', 'Noise', 'ROS', 'SMOTE', 'CTGAN', 'TVAE', 
+    res_df.index = ['Noise', 'ROS', 'SMOTE', 'CTGAN', 'TVAE', 
                     'Gaussian Copula', 'CSL']
     
     return res_df
