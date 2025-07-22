@@ -112,9 +112,9 @@ class SDVSampler(BaseSampler):
     
 class SDVENN(SDVSampler):  
     
-    def __init__(self, generator, metadata, enn_params=None, random_state=None):
+    def __init__(self, generator, metadata, random_state=None):
         super().__init__(generator, metadata, random_state)
-        self.enn = EditedNearestNeighbours(**(enn_params or {}))
+        self.enn = EditedNearestNeighbours()
 
     def resample(self, X, y):
         
@@ -134,8 +134,8 @@ def display_scores(cv_scores, scorings):
         res[scoring.capitalize()] = [round(score[f"test_{scoring}"].mean(), 3) for score in cv_scores]
     
     res_df = pd.DataFrame(res)
-    res_df.index = ['Noise', 'ROS', 'SMOTE', 'CTGAN', 'TVAE', 
-                    'Gaussian Copula', 'CSL']
+    res_df.index = ['Noise', 'ROS', 'SMOTE', 'CTGAN', 'TVAE', 'SMOTENN', 
+                    'CTGANENN', 'CSL']
     
     return res_df
        
