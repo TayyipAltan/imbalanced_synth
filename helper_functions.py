@@ -5,6 +5,8 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import f1_score, roc_auc_score, precision_score, recall_score
 from sklearn.preprocessing import StandardScaler
 
+from imblearn.under_sampling import EditedNearestNeighbours
+
 
 class BaseSampler(BaseEstimator):
     """Base class for all samplers. This class is not meant to be used directly.
@@ -16,7 +18,7 @@ class BaseSampler(BaseEstimator):
             np.random.seed(random_state)
     
     def fit_resample(self, X, y):
-        """Fit the sampler to the data and return the resampled data. Essentially the same as what is done in the original code"""
+        """Fit the sampler to the data and return the resampled data"""
         return self.resample(X, y)
     
     def _get_num_samples(self, y):
@@ -27,7 +29,7 @@ class BaseSampler(BaseEstimator):
         return num_samples  
 
     def resample(self, X, y):
-        """Resample the data using the specified sampling method. Should be the same as the original ones"""
+        """Resample the data using the specified sampling method"""
         
         X_train = X.copy()
         y_train = y.copy()
@@ -90,28 +92,38 @@ class NoiseSampler(BaseSampler):
 
 class SDVSampler(BaseSampler):  
     
-    def __init__(self, generator, metadata, random_state = None, def_distr = None):
+    def __init__(self, generator, metadata, random_state = None):
         super().__init__(random_state)
         self.generator = generator
         self.metadata = metadata
-        self.def_distr = def_distr 
        
     def _generate_syn_data(self, X_minority, num_samples):
         
-        X_resampled = X_minority.copy()
+        X_resample = X_minority.copy()
         
-        # in case Gaussian Copula is used
-        if self.def_distr is not None:
-            # Creating a new instance of the synthesizer within each fold
-            synthesizer = self.generator(self.metadata, 
-                                         default_distribution=self.def_distr)
-        else:
-            synthesizer = self.generator(self.metadata)
-        
-        synthesizer.fit(X_resampled)
+        # Creating a new instance of the synthesizer within each fold
+        synthesizer = self.generator(self.metadata)
+
+        synthesizer.fit(X_resample)
         X_sds = synthesizer.sample(num_samples)
         
         return X_sds
+   
+    
+class SDVENN(SDVSampler):  
+    
+    def __init__(self, generator, metadata, enn_params=None, random_state=None):
+        super().__init__(generator, metadata, random_state)
+        self.enn = EditedNearestNeighbours(**(enn_params or {}))
+
+    def resample(self, X, y):
+        
+        # Oversample using the original SDV class
+        X_sampled, y_sampled = super().resample(X, y)
+        
+        X_resampled, y_resampled = self.enn.fit_resample(X_sampled, y_sampled)
+
+        return X_resampled, y_resampled
         
                
 def display_scores(cv_scores, scorings):
