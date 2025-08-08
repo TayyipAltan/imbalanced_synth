@@ -7,7 +7,6 @@ from sklearn.preprocessing import StandardScaler
 
 from imblearn.under_sampling import EditedNearestNeighbours
 
-
 class BaseSampler(BaseEstimator):
     """Base class for all samplers. This class is not meant to be used directly.
     """
@@ -47,26 +46,7 @@ class BaseSampler(BaseEstimator):
         y_sampled = pd.concat([y_train, pd.Series(np.ones(num_samples))], axis = 0)
 
         return X_sampled, y_sampled
-
-
-class ColumnScaler(BaseEstimator, TransformerMixin):
-    """Transform columns with different scales for SMOTE"""
-    
-    def __init__(self, cols_to_normalize = None):
-        self.cols_to_normalize = cols_to_normalize if cols_to_normalize else ['Time', 'Amount']
-        self.scaler = StandardScaler()
-    
-    def fit(self, X, y = None):
-        self.scaler = self.scaler.fit(X[self.cols_to_normalize])
-        return self
-    
-    def transform(self, X, y = None):
-        X_train = X.copy()
-        
-        X_train[self.cols_to_normalize] = self.scaler.transform(X_train[self.cols_to_normalize]) 
-            
-        return X_train  
-    
+   
     
 class NoiseSampler(BaseSampler):
     
