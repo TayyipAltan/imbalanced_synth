@@ -11,16 +11,16 @@ class BaseSampler(BaseEstimator):
     """Base class for all samplers. This class is not meant to be used directly.
     """
     
-    def __init__(self, random_state = None):
+    def __init__(self, random_state = None) -> None:
         self.random_state = random_state
         if random_state is not None:
             np.random.seed(random_state)
     
-    def fit_resample(self, X, y):
+    def fit_resample(self, X, y) -> tuple:
         """Fit the sampler to the data and return the resampled data"""
         return self.resample(X, y)
     
-    def _get_num_samples(self, y):
+    def _get_num_samples(self, y) -> int:
         """Get the number of samples to generate for the minority class."""
         y_values = y.value_counts()
         num_samples = y_values[0] - y_values[1]
@@ -53,7 +53,7 @@ class NoiseSampler(BaseSampler):
     def __init__(self, random_state = None):
         super().__init__(random_state)
            
-    def _generate_syn_data(self, X_minority, num_samples):
+    def _generate_syn_data(self, X_minority, num_samples) -> pd.dataFrame:
         
         sample_results = {}
 
@@ -77,7 +77,7 @@ class SDVSampler(BaseSampler):
         self.generator = generator
         self.metadata = metadata
        
-    def _generate_syn_data(self, X_minority, num_samples):
+    def _generate_syn_data(self, X_minority, num_samples) -> pd.DataFrame:
         
         X_resample = X_minority.copy()
         
