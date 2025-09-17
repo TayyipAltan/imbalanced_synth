@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 from sklearn.base import BaseEstimator
-from sklearn.metrics import f1_score, roc_auc_score, precision_score, recall_score
+from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.preprocessing import StandardScaler
 
 from imblearn.under_sampling import EditedNearestNeighbours
@@ -110,6 +110,7 @@ class SDVENN(SDVSampler):
         
                
 def display_scores(cv_scores: list, scorings: list) -> pd.DataFrame:
+    """Display the cross-val scores, rounded to three decimals, in a dataframe."""
     
     res = {}
    
