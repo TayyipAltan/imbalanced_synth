@@ -5,12 +5,10 @@ channels:
 dependencies:
   - python=3.11
   - pandas
-  - seaborn
-  - matplotlib
+  - numpy
   - scikit-learn
   - imbalanced-learn
   - pip
-  - skopt
   - lightgbm
   - pip:
       - sdv  
